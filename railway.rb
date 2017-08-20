@@ -1,6 +1,5 @@
 class Station
-
-  attr_reader :name
+  attr_reader :name, :trains
   
   def initialize(name)
     @name = name
@@ -11,22 +10,16 @@ class Station
     @trains << train
   end
 
-  def trains_list
-    @trains
-  end
-
-  def trains_types_list(type)
+  def trains_by_type(type)
      @trains.select { |train| train.type == type }
   end
 
   def send_train(train)
     @trains.delete(train)    
   end
-
 end
 
 class Route
-
   attr_reader :stations
 
   def initialize(start, finish)
@@ -37,14 +30,12 @@ class Route
     @stations.insert(-2, station)    
   end
 
-  def del_station(station)
-    @stations.delete(station)    
+  def delete_station(station)
+    @stations.delete(station) if (station != @stations[0]) && (station != @stations[-1])  
   end
-
 end
 
 class Train
-
   attr_reader :number, :type, :wagon_count, :speed
 
   def initialize(number, type, wagon_count)
@@ -56,11 +47,7 @@ class Train
   end
 
   def speed_up(n)
-    @speed += n
-  end
-
-  def current_speed
-    @speed
+    @speed += n if n > 0
   end
 
   def stop
@@ -75,17 +62,30 @@ class Train
     @wagon_count -= 1 if @speed == 0
   end
 
-  def get_route=(route)
+  def route=(route)
     @route = route
     @station_index = 0
+    current_station.take_train(self)
   end
 
   def go_forward
-    @station_index += 1  
+    if @route.stations[@station_index] != @route.stations[-1]
+      current_station.send_train(self)
+      @station_index += 1
+      current_station.take_train(self)
+    else
+      puts "Вы на конечной станции"
+    end  
   end
 
-    def go_backward
-    @station_index -= 1   
+  def go_backward
+    if @route.stations[@station_index] != @route.stations[0]
+      current_station.send_train(self)
+      @station_index -= 1
+      current_station.take_train(self)
+    else
+      puts "Вы на первой станции"
+    end  
   end
 
   def current_station
@@ -93,11 +93,18 @@ class Train
   end
 
   def next_station
-    @route.stations[@station_index + 1]   
+    if @route.stations[@station_index] != @route.stations[-1]
+      @route.stations[@station_index + 1] 
+    else
+      puts "Вы на конечной станции"
+    end  
   end
   
-    def previous_station
-    @route.stations[@station_index - 1]   
+  def previous_station
+    if @route.stations[@station_index] != @route.stations[0]
+      @route.stations[@station_index - 1]
+    else
+      puts "Вы на первой станции"
+    end     
   end
-
 end
