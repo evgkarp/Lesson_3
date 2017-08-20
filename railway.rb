@@ -59,7 +59,7 @@ class Train
   end
 
   def delete_wagon
-    @wagon_count -= 1 if @speed == 0
+    @wagon_count -= 1 if @speed == 0 && @wagon_count > 0
   end
 
   def route=(route)
